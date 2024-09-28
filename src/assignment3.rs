@@ -300,7 +300,7 @@ pub mod sentence {
         pub words: Vec<String>
     }
 
-    impl Sentece {
+    impl Sentence {
         pub fn new_default() -> Sentence {
             Sentence {
                 words: Vec::new()
