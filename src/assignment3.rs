@@ -328,8 +328,8 @@ mod magicmodule {
             return Err("Both sentences are not in the hashmap");
         }
 
-        let s1 = o1.unwrap().words;
-        let s2 = o2.unwrap().words;
+        let s1 = &o1.unwrap().words;
+        let s2 = &o2.unwrap().words;
 
         Ok(Sentence {
             words: s1.iter().zip(s2.iter()).filter_map(|(w1, w2)| {
