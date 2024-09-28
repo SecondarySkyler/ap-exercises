@@ -8,6 +8,7 @@ mod assignment1;
 mod assignment2;
 mod midterm1;
 mod assignment3;
+mod assignment4;
 
 #[allow(dead_code)]
 fn main() {
