@@ -8,6 +8,7 @@ mod assignment1;
 mod assignment2;
 mod midterm1;
 mod assignment3;
+mod midterm_11_10_2022;
 
 #[allow(dead_code)]
 fn main() {
@@ -178,9 +179,6 @@ fn main() {
 
     // println!("{}", university.remove_student(1).unwrap().id);
 
-    
-    
-  
 }
 
 
