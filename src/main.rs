@@ -9,6 +9,7 @@ mod assignment2;
 mod midterm1;
 mod assignment3;
 mod midterm_11_10_2022;
+mod midterm_10_10_2023;
 mod assignment4;
 
 #[allow(dead_code)]
