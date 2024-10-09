@@ -89,6 +89,24 @@ impl<'a> Person<'a> {
     }
 }
 
+// Exercise 3 
+struct ImportantExcerpt<'a> {
+    part: &'a str
+}
+
+impl <'a: 'b, 'b> ImportantExcerpt<'a> {
+    fn announce_and_return_part(&'a self, announcement: &'b str) -> &'b str {
+        println!("Attention please {}", announcement);
+        self.part
+    }
+}
+
+// Exercise 4
+struct DoubleRef<'a: 'b, 'b, T> {
+    r: &'a T,
+    s : &'b T
+}
+
 #[cfg(test)]
 mod test4 {
     use super::*;
