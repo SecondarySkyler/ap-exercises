@@ -1,5 +1,6 @@
 #![allow(unused)]
-use std::{collections::LinkedList, result};
+use core::{f32, fmt};
+use std::{collections::LinkedList, ops::{Add, Sub}, result};
 
 pub fn find_equal<'a>(s1: &'a str, s2: &'a str) -> Option<(&'a str, &'a str)> {
     for i in 0..s1.len() - 1{
@@ -139,6 +140,122 @@ impl<'a> Split<'a> for LinkedList<f64> {
         (left, right)
     }
 }
+
+// Exercise 6
+pub struct Point {
+    pub x: f32,
+    pub y: f32
+}
+
+pub struct Circle {
+    radius: f32,
+    center: Point
+}
+pub struct Rectangle {
+    top_left: Point,
+    bottom_right: Point
+}
+
+impl Default for Point {
+    fn default() -> Self {
+        Self { x: 0., y: 0. }
+    }
+}
+
+impl Default for Circle {
+    fn default() -> Self {
+        Self { radius: 1.0, center: Point::default() }
+    }
+}
+
+impl Default for Rectangle {
+    fn default() -> Self {
+        Self { top_left: Point { x: -1., y: 1. }, bottom_right: Point { x: 1., y: -1. }}
+    }
+}
+
+impl Add for Point {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+impl Sub for Point {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct Area {
+    pub area: f32
+}
+
+impl Default for Area {
+    fn default() -> Self {
+        Self { area: 0. }
+    }
+}
+
+impl fmt::Display for Area {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Area is {} cm2", self.area)
+    }
+}
+
+pub trait GetArea {
+    fn get_area(&self) -> Area;
+}
+
+impl GetArea for Point {
+    fn get_area(&self) -> Area {
+        Area { area: 0.0 }
+    }
+}
+
+impl GetArea for Circle {
+    fn get_area(&self) -> Area {
+        Area {
+            area: f32::consts::PI * self.radius.powi(2)
+        }
+        
+    }
+}
+
+impl GetArea for Rectangle {
+    fn get_area(&self) -> Area {
+        let height = self.bottom_right.y - self.top_left.y;
+        let width = self.bottom_right.x - self.top_left.x;
+        Area { area: width * height }
+    }
+}
+
+impl Add for Area {
+    type Output = Area;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Area {
+            area: self.area + rhs.area
+        }
+    }
+}
+
+pub fn sum_area(items: &[&dyn GetArea]) -> Area {
+    let mut res = Area::default();
+    items.iter().for_each(|shape| res = res + shape.get_area());
+    res
+}
+
 
 #[cfg(test)]
 mod test4 {
