@@ -256,6 +256,17 @@ pub fn sum_area(items: &[&dyn GetArea]) -> Area {
     res
 }
 
+// Ex7
+pub fn skip_prefix<'a>(telephone_number: &'a str, prefix: &'a str) -> &'a str {
+    if telephone_number.contains(prefix) {
+        let mut tel_clone = telephone_number;
+        tel_clone.replace(prefix, "");
+        return tel_clone
+    } else {
+        return telephone_number
+    }
+}
+
 
 #[cfg(test)]
 mod test4 {
