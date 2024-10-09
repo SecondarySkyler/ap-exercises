@@ -1,5 +1,5 @@
 #![allow(unused)]
-use std::result;
+use std::{collections::LinkedList, result};
 
 pub fn find_equal<'a>(s1: &'a str, s2: &'a str) -> Option<(&'a str, &'a str)> {
     for i in 0..s1.len() - 1{
@@ -105,6 +105,39 @@ impl <'a: 'b, 'b> ImportantExcerpt<'a> {
 struct DoubleRef<'a: 'b, 'b, T> {
     r: &'a T,
     s : &'b T
+}
+
+// Exercise 5
+trait Split<'a> {
+    type ReturnType;
+    fn split(&'a self) -> (Self::ReturnType, Self::ReturnType);
+}
+
+impl<'a> Split<'a> for String {
+    type ReturnType = &'a str;
+    fn split(&'a self) -> (Self::ReturnType, Self::ReturnType) {
+        (&self[0..self.len()/2], &self[self.len()/2+1..])
+        // self.as_str().split_at(self.len() / 2)
+    }
+}
+
+impl<'a> Split<'a> for &[i32] {
+    type ReturnType = &'a [i32];
+
+    fn split(&'a self) -> (Self::ReturnType, Self::ReturnType) {
+        (&self[0..self.len()/2], &self[self.len() / 2 + 1..])
+        // self.split_at(self.len() / 2)
+    }
+}
+
+impl<'a> Split<'a> for LinkedList<f64> {
+    type ReturnType = LinkedList<f64>;
+
+    fn split(&'a self) -> (Self::ReturnType, Self::ReturnType) {
+        let mut left = self.clone();
+        let right = left.split_off(left.len() / 2);
+        (left, right)
+    }
 }
 
 #[cfg(test)]
