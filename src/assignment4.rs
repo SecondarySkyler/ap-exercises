@@ -1,6 +1,6 @@
 #![allow(unused)]
 use core::{f32, fmt};
-use std::{collections::LinkedList, ops::{Add, Sub}, result};
+use std::{collections::{HashMap, LinkedList}, ops::{Add, Sub}, result};
 
 pub fn find_equal<'a>(s1: &'a str, s2: &'a str) -> Option<(&'a str, &'a str)> {
     for i in 0..s1.len() - 1{
@@ -267,6 +267,182 @@ pub fn skip_prefix<'a>(telephone_number: &'a str, prefix: &'a str) -> &'a str {
     }
 }
 
+// Ex8 
+struct Chair<'a> {
+    pub color: &'a str,
+    pub quantity: &'a usize
+}
+
+struct Wardrobe<'a> {
+    pub color: &'a str,
+    pub quantity: &'a usize
+}
+
+trait Object {
+    fn build(&self) -> & str;
+    fn get_quantity(&self) -> String;
+}
+
+impl<'a> Object for Chair<'a> {
+    fn build(& self) -> & str {
+        "Chair has been built"
+    }
+
+    fn get_quantity(&self) -> String {
+        format!("We have {} chairs", self.quantity).as_str().to_owned()
+    }
+}
+
+impl<'a> Object for Wardrobe<'a> {
+    fn build(& self) -> & str {
+        "Wardrobe has been built"
+    }
+
+    fn get_quantity(&self) -> String {
+        format!("We have {} wardrobes", self.quantity).as_str().to_owned()
+    }
+}
+
+impl<'a> fmt::Display for Chair<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.quantity <= &0 {
+            write!(f, "You don't have any chair")
+        } else if self.quantity == &1 {
+            write!(f, "You have 1 {} chair", self.color)
+        } else {
+            write!(f, "You have {} {} chairs", self.quantity, self.color)
+        }
+    }
+}
+
+impl<'a> fmt::Display for Wardrobe<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.quantity <= &0 {
+            write!(f, "You don't have any Wardrobe")
+        } else if self.quantity == &1 {
+            write!(f, "You have 1 {} Wardrobe", self.color)
+        } else {
+            write!(f, "You have {} {} Wardrobes", self.quantity, self.color)
+        }
+    }
+}
+
+// Ex 9
+#[derive(PartialEq, Eq)]
+pub enum Role {
+    GUEST,
+    USER,
+    ADMIN
+}
+
+#[derive(PartialEq, Eq, Hash, Clone, Copy)]
+pub enum Permission {
+    READ,
+    WRITE,
+    EXECUTE
+}
+
+struct Actions {
+    action: String,
+    permission: HashMap<Permission, bool>
+}
+
+struct User {
+    name: String,
+    role: Role,
+    actions: Vec<Actions>
+}
+
+trait Auth {
+    fn check_permission(&self, action: &str, permission_type: &Permission) -> bool;
+    fn can_write(&self, string: &str) -> bool;
+    fn can_read(&self, string: &str) -> bool;
+    fn can_execute(&self, string: &str) -> bool;
+}
+
+impl Auth for User {
+    fn check_permission(&self, action: &str, permission_type: &Permission) -> bool {
+        self.actions.iter().any(|x| {
+            x.action == action && x.permission.get(permission_type).cloned().unwrap_or(false)
+        })
+    }
+
+    fn can_write(&self, string: &str) -> bool {
+        self.check_permission(string, &Permission::WRITE)
+    }
+
+    fn can_read(&self, string: &str) -> bool {
+        self.check_permission(string, &Permission::READ)
+    }
+
+    fn can_execute(&self, string: &str) -> bool {
+        self.check_permission(string, &Permission::EXECUTE)
+    }
+}
+
+impl Default for Actions {
+    fn default() -> Self {
+        let mut permission = HashMap::new();
+        permission.insert(Permission::READ, false);
+        permission.insert(Permission::WRITE, false);
+        permission.insert(Permission::EXECUTE, false);
+        Actions { action: "".to_string(), permission: permission }
+    }
+}
+
+impl Actions {
+    fn new(action: String, read: bool, write: bool, execute: bool) -> Self {
+        let mut permission = HashMap::new();
+        permission.insert(Permission::READ, read);
+        permission.insert(Permission::WRITE, write);
+        permission.insert(Permission::EXECUTE, execute);
+        Actions { action, permission: permission }
+    }
+}
+
+impl Default for User {
+    fn default() -> Self {
+        User {
+            name: "Guest".to_string(),
+            role: Role::GUEST,
+            actions: Vec::new()
+        }
+    }
+}
+
+impl User {
+    fn change_role(&mut self, role: Role) -> Result<(), String> {
+        match self.role {
+            Role::GUEST => {
+                if role == Role::GUEST {
+                    return Ok(())
+                } else {
+                    return Err("You dont have permission to change your role".to_string())
+                }
+            },
+            Role::USER => {
+                if role == Role::ADMIN {
+                    return Err("Cannot switch from USER to ADMIN".to_string())
+                } else {
+                    self.role = role;
+                    return Ok(());
+                }
+            },
+            Role::ADMIN => {
+                self.role = role;
+                return Ok(());
+            },
+        }
+    }
+}
+
+fn sudo_change_permission(user: &mut User, string: String, permission: Permission, value: bool) {
+    user.actions.iter_mut().for_each(|action| {
+        if action.action == string {
+            action.permission.insert(permission, value);
+        }
+    });
+}
 
 #[cfg(test)]
 mod test4 {
