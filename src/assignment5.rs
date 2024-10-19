@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 use std::{default, fmt::{Debug, Display}};
+use std::ops::{Add, Sub, Mul};
 
 pub trait Printable {
     fn print(&self);
@@ -148,6 +149,65 @@ impl<'a> Iterator for TaskIterator<'a> {
     }
 }
 
+// Exercise 5
+#[derive(Debug, PartialEq, Eq)]
+struct Pair(i32, String);
+
+impl Add<i32> for Pair {
+    type Output = Self;
+
+    fn add(self, rhs: i32) -> Self::Output {
+      Pair(self.0 + rhs, self.1)  
+    }
+}
+
+impl Sub<i32> for Pair {
+    type Output = Self;
+
+    fn sub(self, rhs: i32) -> Self::Output {
+      Pair(self.0 - rhs, self.1)  
+    }
+}
+
+impl Add<&str> for Pair {
+    type Output = Self;
+
+    fn add(self, rhs: &str) -> Self::Output {
+        Pair(self.0, self.1 + rhs)
+    }
+}
+
+impl Sub<&str> for Pair {
+    type Output = Self;
+
+    fn sub(self, rhs: &str) -> Self::Output {
+        Pair(self.0, self.1.replace(rhs, ""))
+    }
+}
+
+impl Add for Pair {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        self + rhs.0 + rhs.1.as_str()
+    }
+}
+
+impl Sub for Pair {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        self - rhs.0 - rhs.1.as_str()
+    }
+}
+
+impl Mul<i32> for Pair {
+    type Output = Self;
+
+    fn mul(self, rhs: i32) -> Self::Output {
+        Pair(self.0.pow(rhs as u32), self.1.repeat(rhs as usize))
+    }
+}
 
 #[cfg(test)]
 mod test5 {
@@ -178,6 +238,14 @@ mod test5 {
         for task in tm.iter() {
             println!("{:?}", task);
         }
+    }
+
+    #[test]
+    fn test_ex5() {
+        let p1 = Pair(6, "hello".to_string());
+        let p2 = Pair(3, "hello".to_string());
+        assert_eq!(p1 + 4, Pair(10, "hello".to_string()));
+        assert_eq!(p2 + " world", Pair(3, "hello world".to_string()));
     }
 }
 
