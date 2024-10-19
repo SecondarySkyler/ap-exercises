@@ -90,6 +90,64 @@ pub fn restricted<T: PartialOrd + Debug, U: Display>(t1: T, t2: T, u: U) -> T {
     min
 }
 
+// Exercise 4
+struct Tasks {
+    pub tasks: Vec<Task>,
+}
+
+#[derive(Clone, Debug)]
+struct Task {
+    name: String,
+    priority: i32,
+    done: bool
+}
+
+impl Task {
+    fn new(name: String, priority: i32, done: bool) -> Self {
+        Task { name, priority, done } // doesnt make sense...
+    }
+}
+
+impl Tasks {
+    fn new() -> Self {
+        Tasks { tasks: Vec::new() }
+    }
+
+    fn insert_task(&mut self, nt: Task) {
+        self.tasks.push(nt);
+    }
+
+
+    fn iter(&mut self) -> TaskIterator {
+        self.tasks.retain(|task| !task.done);
+        TaskIterator {
+            list_tasks: self,
+            it_index: 0
+        }
+    }
+}
+
+
+struct TaskIterator<'a> {
+    list_tasks: &'a Tasks,
+    it_index: usize
+}
+
+impl<'a> Iterator for TaskIterator<'a> {
+    type Item = &'a Task;
+
+    fn next(&mut self) -> Option<Self::Item> {
+       if self.it_index < self.list_tasks.tasks.len() {
+           let task = Some(&self.list_tasks.tasks[self.it_index]);
+           self.it_index += 1;
+           task
+       } else {
+           None
+       } 
+        
+    }
+}
+
 
 #[cfg(test)]
 mod test5 {
@@ -107,6 +165,19 @@ mod test5 {
     #[test]
     fn test_ex3() {
         assert_eq!(restricted(1, 2, 3), 1);
+    }
+
+    #[test]
+    fn test_ex4() {
+        let  t1: Task = Task::new("t1".to_string(), 1, true);
+        let  t2: Task = Task::new("t2".to_string(), 1, false);
+        let mut tm: Tasks = Tasks::new();
+        tm.insert_task(t1);
+        tm.insert_task(t2);
+
+        for task in tm.iter() {
+            println!("{:?}", task);
+        }
     }
 }
 
