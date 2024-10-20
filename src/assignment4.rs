@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::result;
 
 pub fn find_equal<'a>(s1: &'a str, s2: &'a str) -> Option<(&'a str, &'a str)> {
@@ -11,27 +12,27 @@ pub fn find_equal<'a>(s1: &'a str, s2: &'a str) -> Option<(&'a str, &'a str)> {
     None
 }
 
-fn random_letter() -> char{
-    let mut n = rand::random::<u8>();
-    n = n % 26 + 'a' as u8;
-    n as char
-}
-fn random_string(len: usize) -> String{
-    let mut s = String::with_capacity(len);
-    for _ in 0 .len{
-        s.push(random_letter());
-    }
-    s
-}
+// fn random_letter() -> char{
+//     let mut n = rand::random::<u8>();
+//     n = n % 26 + 'a' as u8;
+//     n as char
+// }
+// fn random_string(len: usize) -> String{
+//     let mut s = String::with_capacity(len);
+//     for _ in 0 .len{
+//         s.push(random_letter());
+//     }
+//     s
+// }
 
-pub fn lucky_slice(input_str: &str) -> Option<&str> {
-    let second_str = random_string(input_str.len());
-    let result = find_equal(input_str, &second_str);
-    if result.is_none(){
-        return None;
-    }
-    return Some(result.unwrap().0);
-}
+// pub fn lucky_slice(input_str: &str) -> Option<&str> {
+//     let second_str = random_string(input_str.len());
+//     let result = find_equal(input_str, &second_str);
+//     if result.is_none(){
+//         return None;
+//     }
+//     return Some(result.unwrap().0);
+// }
 
 #[cfg(test)]
 mod test4 {
