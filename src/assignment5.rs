@@ -2,6 +2,7 @@
 
 use std::{default, fmt::{Debug, Display}};
 use std::ops::{Add, Sub, Mul};
+use rand::{self, Rng};
 
 pub trait Printable {
     fn print(&self);
@@ -209,6 +210,176 @@ impl Mul<i32> for Pair {
     }
 }
 
+// Exercise 6
+#[derive(Debug)]
+struct Open;
+
+#[derive(Debug)]
+struct Closed;
+
+#[derive(Debug)]
+struct Stopped {
+    reason: String
+}
+
+struct Gate<S> {
+    state: S
+}
+
+impl Gate<Open> {
+    fn new() -> Gate<Open> {
+        Gate { state: Open }
+    }
+
+    fn close(self) -> Result<Gate<Closed>, Gate<Stopped>> {
+        let r = rand::thread_rng().gen_range(0..10);
+        if r <= 7 {
+            return Ok(Gate { state: Closed })
+        } else {
+            return Err(Gate { state: Stopped { reason: "Bo".to_string() } })
+        }
+    }
+}
+
+impl Gate<Closed> {
+    fn new() -> Gate<Closed> {
+        Gate { state: Closed }
+    }
+
+    fn open(self) ->Result<Gate<Open>, Gate<Stopped>> {
+        let r = rand::thread_rng().gen_range(0..10);
+        if r <= 7 {
+            return Ok(Gate { state: Open })
+        } else {
+            return Err(Gate { state: Stopped { reason: "Bo".to_string() } })
+        }
+    }
+}
+
+impl Gate<Stopped> {
+    fn new(reason: String) -> Gate<Stopped> {
+        Gate { state: Stopped { reason } }
+    }
+
+    fn open(self) -> Gate<Open> {
+        Gate { state: Open }
+    }
+
+    fn close(self) -> Gate<Closed> {
+        Gate { state: Closed }
+    }
+}
+
+// Exercise 7
+trait Heatable {
+    fn cook(&mut self);
+}
+
+trait Friable {
+    fn cook(&mut self);
+}
+
+trait Heater {
+    fn heat(&self, heatable: &mut dyn Heatable);
+}
+
+trait Frier {
+    fn fry(&self, friable: &mut dyn Friable);
+}
+
+struct Oven;
+struct Pan;
+
+impl Heater for Oven {
+    fn heat(&self, heatable: &mut dyn Heatable) {
+        heatable.cook();
+    }
+}
+
+impl Heater for Pan {
+    fn heat(&self, heatable: &mut dyn Heatable) {
+        heatable.cook();
+    }
+}
+
+impl Frier for Pan {
+    fn fry(&self, friable: &mut dyn Friable) {
+        friable.cook();
+    }
+}
+
+struct Pie {
+    ready: bool
+}
+
+#[derive(PartialEq, Eq)]
+enum CarrotState {
+    Raw,
+    Cooked,
+    Fried,
+    Burnt
+}
+
+struct Carrot {
+    state: CarrotState
+}
+
+trait Edible {
+    fn eat(&self);
+}
+
+impl Heatable for Pie {
+    fn cook(&mut self) {
+        match self.ready {
+            true => println!("you burned the pie!!"),
+            false => { self.ready = true; }
+        }
+    }
+}
+
+impl Heatable for Carrot {
+    fn cook(&mut self) {
+        match self.state {
+            CarrotState::Raw => { self.state = CarrotState::Cooked; },
+            _ => { self.state = CarrotState::Burnt; }
+        }
+    }
+}
+
+impl Friable for Carrot {
+    fn cook(&mut self) {
+        /* if self.state == CarrotState::Fried {
+            self.state = CarrotState::Burnt;
+        } else {
+            self.state = CarrotState::Fried;
+        } */
+        match self.state {
+            CarrotState::Fried => { self.state = CarrotState::Burnt; },
+            _ => { self.state = CarrotState::Fried; }
+        }
+    }
+}
+
+impl Edible for Pie {
+    fn eat(self) {
+        match self.ready {
+            true => println!("yummy"),
+            false => println!("you got stomach ache"),
+        }
+    }
+}
+
+impl Edible for Carrot {
+    fn eat(self) {
+        match self.state {
+            CarrotState::Raw => println!("mmh, crunchy"),
+            CarrotState::Cooked => println!("mmh, yummy"),
+            CarrotState::Fried => println!("mmh, crispy"),
+            CarrotState::Burnt => println!("mmh, burnt"),
+        }
+    }
+}
+
 #[cfg(test)]
 mod test5 {
     use super::*;
@@ -248,5 +419,3 @@ mod test5 {
         assert_eq!(p2 + " world", Pair(3, "hello world".to_string()));
     }
 }
-
-
