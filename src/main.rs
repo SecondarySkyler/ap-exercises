@@ -11,10 +11,11 @@ mod assignment3;
 mod midterm_11_10_2022;
 mod midterm_10_10_2023;
 mod assignment4;
+mod assignment5;
+use assignment5::{print, Printable};
 
 #[allow(dead_code)]
 fn main() {
-
     // Assignment 1
     // let s = "Hello, world!";
     // println!("{}", assignment1::string_reverse(s));
