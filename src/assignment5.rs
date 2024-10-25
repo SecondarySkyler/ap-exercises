@@ -361,7 +361,7 @@ impl Friable for Carrot {
 }
 
 impl Edible for Pie {
-    fn eat(self) {
+    fn eat(&self) {
         match self.ready {
             true => println!("yummy"),
             false => println!("you got stomach ache"),
@@ -370,7 +370,7 @@ impl Edible for Pie {
 }
 
 impl Edible for Carrot {
-    fn eat(self) {
+    fn eat(&self) {
         match self.state {
             CarrotState::Raw => println!("mmh, crunchy"),
             CarrotState::Cooked => println!("mmh, yummy"),
