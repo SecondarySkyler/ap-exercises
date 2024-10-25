@@ -13,6 +13,7 @@ mod midterm_10_10_2023;
 mod assignment4;
 mod assignment5;
 use assignment5::{print, Printable};
+mod assignment6;
 
 #[allow(dead_code)]
 fn main() {
