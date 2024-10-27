@@ -14,6 +14,8 @@ mod assignment4;
 mod assignment5;
 use assignment5::{print, Printable};
 mod assignment6;
+mod midterm_2_22_11_2022;
+mod ds;
 
 #[allow(dead_code)]
 fn main() {
