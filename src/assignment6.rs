@@ -199,7 +199,7 @@ impl Sound for Farmcell {
 }
 
 // Exercise 4
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct PublicStreetLight {
     id: u32,
     on: bool,
@@ -227,13 +227,14 @@ impl PublicIllumination {
         Self { lights }
     }
 
-    fn iter_mut(&mut self) -> PublicIlluminationIterator {
-        self.lights.retain(|light| !light.burn_out);
-        PublicIlluminationIterator {
-            container: self,
-            index: 0
-        }
-    }
+    // could be a good implementation but...
+    // fn iter_mut(&mut self) -> PublicIlluminationIterator {
+    //     self.lights.retain(|light| !light.burn_out);
+    //     PublicIlluminationIterator {
+    //         container: self,
+    //         index: 0
+    //     }
+    // }
 }
 
 impl Default for PublicIllumination {
@@ -242,24 +243,36 @@ impl Default for PublicIllumination {
     }
 }
 
-struct PublicIlluminationIterator<'a> {
-    container: &'a PublicIllumination,
-    index: usize
-}
-
-impl<'a> Iterator for PublicIlluminationIterator<'a> {
-    type Item = &'a PublicStreetLight;
-
+impl Iterator for PublicIllumination {
+    type Item = PublicStreetLight;
     fn next(&mut self) -> Option<Self::Item> {
-        if self.index < self.container.lights.len() {
-            let broken_light = Some(&self.container.lights[self.index]);
-            self.index += 1;
-            broken_light
-        } else {
-            return None
+        if let Some(pos) = self.lights.iter().position(|light| light.burn_out) {
+            return Some(self.lights.remove(pos))
         }
+        None
     }
 }
+
+// Haters will see this and start crying
+// struct PublicIlluminationIterator<'a> {
+//     container: &'a PublicIllumination,
+//     index: usize
+// }
+
+
+// impl<'a> Iterator for PublicIlluminationIterator<'a> {
+//     type Item = &'a PublicStreetLight;
+
+//     fn next(&mut self) -> Option<Self::Item> {
+//         if self.index < self.container.lights.len() {
+//             let broken_light = Some(&self.container.lights[self.index]);
+//             self.index += 1;
+//             broken_light
+//         } else {
+//             return None
+//         }
+//     }
+// }
 
 #[cfg(test)]
 mod test6 {
@@ -269,9 +282,9 @@ mod test6 {
     fn test_ex1() {
         let vn = vec![10, 5, 20];
         let tree = TreeNode::from_vec(vn);
-        tree.preorder();
-        tree.inorder();
-        tree.postorder();
+        // tree.preorder();
+        // tree.inorder();
+        // tree.postorder();
     }
 
     #[test]
@@ -288,7 +301,7 @@ mod test6 {
         car_dealer.rent_user(&mut user, "Audi".to_string());
 
         assert_eq!(car_dealer.cars[0].borrow().rent, true);
-        user.print_car();
+        // user.print_car();
 
         car_dealer.end_rental(&mut user);
         assert_eq!(car_dealer.cars[0].borrow().rent, false);
@@ -314,8 +327,10 @@ mod test6 {
 
         let mut pi = PublicIllumination::new(vec![sl0, sl1, sl2, sl3]);
 
-        for lampione in pi.iter_mut() {
-            println!("{:?}", lampione);
-        }
+        // for lampione in pi.iter_mut() {
+        //     println!("{:?}", lampione);
+        // }
+
+        
     }
 }
