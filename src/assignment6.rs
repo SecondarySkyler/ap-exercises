@@ -199,6 +199,7 @@ impl Sound for Farmcell {
 }
 
 // Exercise 4
+#[derive(Debug)]
 struct PublicStreetLight {
     id: u32,
     on: bool,
@@ -302,5 +303,19 @@ mod test6 {
         fc.insert(b_dog);
 
         assert_eq!(fc.make_sound(), "MooBau".to_string());
+    }
+
+    #[test]
+    fn test_ex4() {
+        let sl0 = PublicStreetLight::new(0, true, true);
+        let sl1 = PublicStreetLight::new(1, true, false);
+        let sl2 = PublicStreetLight::new(2, false, true);
+        let sl3 = PublicStreetLight::new(3, false, false);
+
+        let mut pi = PublicIllumination::new(vec![sl0, sl1, sl2, sl3]);
+
+        for lampione in pi.iter_mut() {
+            println!("{:?}", lampione);
+        }
     }
 }
