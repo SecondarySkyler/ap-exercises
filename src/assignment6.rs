@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use std::{cell::{Ref, RefCell}, fmt::Debug, rc::Rc};
+use std::{cell::{Ref, RefCell}, fmt::Debug, rc::Rc, marker::PhantomData};
 
 // Exercise 1
 struct TreeNode<T> where T: PartialOrd + Clone + Debug {
@@ -274,6 +274,78 @@ impl Iterator for PublicIllumination {
 //     }
 // }
 
+
+// Exercise 5
+trait CompileTimeNode {
+    type LeftType: CompileTimeNode;
+    type RightType: CompileTimeNode;
+    fn is_none() -> bool;
+}
+
+struct NullNode {}
+
+impl CompileTimeNode for NullNode {
+    type LeftType = NullNode;
+    type RightType = NullNode;
+
+    fn is_none() -> bool {
+        true
+    }
+}
+
+struct Node<L: CompileTimeNode, R: CompileTimeNode> {
+    left: PhantomData<L>,
+    right: PhantomData<R>
+}
+
+impl<L: CompileTimeNode, R: CompileTimeNode> CompileTimeNode for Node<L, R> {
+    type LeftType = L;
+    type RightType = R;
+
+    fn is_none() -> bool {
+        false
+    }
+}
+
+fn count_nodes<T: CompileTimeNode>() -> usize {
+    let mut count: usize = 0;
+    if !T::is_none() {
+        count = 1;
+        count += count_nodes::<T::LeftType>();
+        count += count_nodes::<T::RightType>();
+    }
+    count
+}
+
+// Exercise 6
+struct EntangledBit {
+    bit: Rc<RefCell<bool>>
+}
+
+impl Default for EntangledBit {
+    fn default() -> Self {
+        Self { bit: Rc::new(RefCell::new(false)) }
+    }
+}
+
+impl EntangledBit {
+    fn set(&mut self) {
+        *self.bit.borrow_mut() = true;
+    }
+
+    fn reset(&mut self) {
+        *self.bit.borrow_mut() = false;
+    }
+
+    fn get(&self) -> bool {
+        *self.bit.borrow()
+    }
+
+    fn entangle_with(&self, other: &mut Self) {
+        other.bit = self.bit.clone();
+    }
+}
+
 #[cfg(test)]
 mod test6 {
     use super::*;
@@ -332,5 +404,47 @@ mod test6 {
         // }
 
         
+    }
+
+    #[test]
+    fn test_ex5() {
+        let len = count_nodes::<
+            Node<
+            Node<
+            Node<
+            NullNode,
+            NullNode,
+            >,NullNode
+            >,
+            Node<
+            Node<
+            Node<
+            Node<
+            NullNode,
+            NullNode
+            >,
+            NullNode
+            >,
+            Node<
+            NullNode,
+            NullNode
+            >
+            >,
+            NullNode
+            >
+            >
+            >();
+        assert_eq!(len, 8);
+    }
+
+    #[test]
+    fn test_ex6() {
+        let mut b1 = EntangledBit::default();
+        let mut b2 = EntangledBit::default();
+
+        assert_eq!(b2.get(), false);
+        b1.entangle_with(&mut b2);
+        b1.set();
+        assert_eq!(b2.get(), true);
     }
 }
