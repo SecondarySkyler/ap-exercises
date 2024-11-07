@@ -1,10 +1,10 @@
 #![allow(unused)]
 
-use std::{cell::RefCell, fmt::Display, rc::Rc};
+use std::{borrow::Borrow, cell::RefCell, fmt::Display, rc::Rc};
 
-type Link<T> = Option<Rc<RefCell<Node<T>>>>;
+type Link<T> = Option<Box<Node<T>>>;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct Node<T> {
     data: T,
     next: Link<T>
@@ -34,10 +34,11 @@ impl<T: Clone> LinkedList<T> {
     }
 
     fn insert_front(&mut self, element: T) {
-        let new_node = Rc::new(RefCell::new(Node::new(element)));
+        let mut new_node = Box::new(Node::new(element));
+
         match self.head.take() {
             Some(prev_head) => {
-                new_node.borrow_mut().next = Some(prev_head.clone());
+                new_node.next = Some(prev_head);
                 self.head = Some(new_node.clone());
                 self.size += 1;
             },
@@ -49,40 +50,62 @@ impl<T: Clone> LinkedList<T> {
         }
     }
 
-    fn insert_back(&mut self, element: T) {
-        let new_node = Rc::new(RefCell::new(Node::new(element)));
-        match self.tail.take() {
-            Some(prev_tail) => {
-                prev_tail.borrow_mut().next = Some(new_node.clone());
-                self.tail = Some(new_node.clone());
-                self.size += 1;
-            },
-            None => {
-                self.head = Some(new_node.clone());
-                self.tail = Some(new_node.clone());
-                self.size += 1;
-            },
-        }
-    }
 
     fn pop_head(&mut self) -> Option<T> {
         match self.head.take() {
-            Some(head) => {
-                self.head = head.borrow().next.clone();
-                return Some(head.borrow().data.clone())
+            Some(current_head) => {
+                self.head = current_head.next;
+                self.size -= 1;
+                Some(current_head.data)
             },
-            None => return  None,
+            None => None,
         }
+    }
+
+    fn iter(&self) -> LLIter<T> {
+        LLIter { head: self.head.as_deref() }
+    }
+
+    fn iter_mut(&mut self) -> LLMutIter<T> {
+        todo!()
     }
 
 }
 
+struct LLIter<'a, T> {
+    head: Option<&'a Node<T>>,
+}
+
+impl<'a, T> Iterator for LLIter<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.head.map(|node| {
+            self.head = node.next.borrow().as_deref();
+            &node.data
+        })
+        
+    }
+}
+
+struct LLMutIter<'a, T> {
+    list: &'a mut LinkedList<T>
+}
+
+impl<'a, T> Iterator for LLMutIter<'a, T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        todo!()
+    }
+}
+
 impl<T: Display> Display for LinkedList<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut current_head = self.head.clone();
+        let mut current_head = &self.head;
         while let Some(node) = current_head {
-            write!(f, "{}", node.borrow().data);
-            current_head = node.borrow().next.clone();
+            write!(f, "{}", node.data);
+            current_head = &node.next;
         }
         Ok(())
     }
@@ -106,29 +129,32 @@ mod test_ll {
         list.insert_front(2);
         list.insert_front(3);
         list.insert_front(4);
-        assert_eq!(list.head.unwrap().borrow().data, 4);
-        assert_eq!(list.tail.unwrap().borrow().data, 1);
-    }
-
-    #[test]
-    fn test_back_insert() {
-        let mut list = LinkedList::<i32>::new();
-        list.insert_back(1);
-        list.insert_back(2);
-        list.insert_back(3);
-        list.insert_back(4);
-        assert_eq!(list.head.unwrap().borrow().data, 1);
-        assert_eq!(list.tail.unwrap().borrow().data, 4);
+        assert_eq!(list.head.unwrap().data, 4);
+        assert_eq!(list.tail.unwrap().data, 1);
     }
 
     #[test]
     fn test_pop_head() {
         let mut list = LinkedList::<i32>::new();
-        list.insert_back(1);
-        list.insert_back(2);
+        list.insert_front(1);
+        list.insert_front(2);
         list.pop_head();
-        assert_eq!(list.head.as_ref().unwrap().borrow().data, 2);
+        assert_eq!(list.head.as_ref().unwrap().data, 1);
         list.pop_head();
         assert_eq!(list.pop_head(), None);
+    }
+
+    #[test]
+    fn test_iter() {
+        let mut list = LinkedList::<i32>::new();
+        list.insert_front(1);
+        list.insert_front(2);
+        list.insert_front(3);
+        list.insert_front(4);
+        let mut list_it = list.iter();
+        assert_eq!(list_it.next(), Some(&4));
+        assert_eq!(list_it.next(), Some(&3));
+        assert_eq!(list_it.next(), Some(&2));
+        assert_eq!(list_it.next(), Some(&1));
     }
 }
