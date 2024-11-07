@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use std::{borrow::Borrow, cell::RefCell, fmt::Display, rc::Rc};
+use std::{borrow::{Borrow, BorrowMut}, cell::RefCell, fmt::Display, rc::Rc};
 
 type Link<T> = Option<Box<Node<T>>>;
 
@@ -67,7 +67,7 @@ impl<T: Clone> LinkedList<T> {
     }
 
     fn iter_mut(&mut self) -> LLMutIter<T> {
-        todo!()
+        LLMutIter { head: self.head.as_deref_mut() }
     }
 
 }
@@ -89,14 +89,20 @@ impl<'a, T> Iterator for LLIter<'a, T> {
 }
 
 struct LLMutIter<'a, T> {
-    list: &'a mut LinkedList<T>
+    head: Option<&'a mut Node<T>>
 }
 
 impl<'a, T> Iterator for LLMutIter<'a, T> {
-    type Item = T;
+    type Item = &'a mut T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        todo!()
+        match self.head.take() {
+            None => None,
+            Some(n) => {
+                self.head = n.next.as_deref_mut();
+                Some(&mut n.data)
+            }
+        }
     }
 }
 
@@ -156,5 +162,23 @@ mod test_ll {
         assert_eq!(list_it.next(), Some(&3));
         assert_eq!(list_it.next(), Some(&2));
         assert_eq!(list_it.next(), Some(&1));
+    }
+
+    #[test]
+    fn test_itermut() {
+        let mut list = LinkedList::<i32>::new();
+        list.insert_front(1);
+        list.insert_front(2);
+        list.insert_front(3);
+        list.insert_front(4);
+        for node in list.iter_mut() {
+            *node += 1;   
+        }
+
+        let mut list_it = list.iter();
+        assert_eq!(list_it.next(), Some(&5));
+        assert_eq!(list_it.next(), Some(&4));
+        assert_eq!(list_it.next(), Some(&3));
+        assert_eq!(list_it.next(), Some(&2));
     }
 }
