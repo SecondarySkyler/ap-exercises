@@ -101,8 +101,40 @@ impl SlaveClock {
     }
 }
 
+mod finance {
+    type Wallet1 = wallet_1::Wallet;
+    type Wallet2 = wallet_2::Wallet;
+
+    pub mod wallet_1 {
+        #[derive(Debug)]
+        pub struct Wallet {
+            pub euro: f32
+        }
+    }
+
+    pub mod wallet_2 {
+        #[derive(Debug)]
+        pub struct Wallet {
+            pub euro: u32,
+            pub cents: u8
+        }
+    }
+
+    pub fn compare_wallet(w1: &Wallet1, w2: &Wallet2) -> bool {
+        if w1.euro > w2.euro as f32 {
+            return true;
+        } else if w1.euro == w2.euro as f32 && w2.cents > 0 {
+            return false;
+        } else {
+            return false;
+        }
+    }
+}
+
 #[cfg(test)]
 mod mt_2_22_01_2024 {
+    use finance::compare_wallet;
+
     use super::*;
 
     #[test]
@@ -162,5 +194,13 @@ mod mt_2_22_01_2024 {
 
         assert_eq!(sc1.get_clock(), 5);
         assert_eq!(sc2.get_clock(), 5);
+    }
+
+    #[test]
+    fn test_wallet() {
+        let w1 = finance::wallet_1::Wallet{ euro: 100. };
+        let w2 = finance::wallet_2::Wallet{ euro: 90, cents: 50 };
+
+        assert_eq!(compare_wallet(&w1, &w2), true);
     }
 }
