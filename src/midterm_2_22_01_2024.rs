@@ -131,6 +131,101 @@ mod finance {
     }
 }
 
+// Exercise 6
+#[derive(Debug)]
+pub struct Content{
+    pub i:i32,
+    pub s:String
+}
+impl Content {
+    pub fn new(i: i32, s: String) -> Content {
+        Content { i, s }
+    }
+}
+
+impl PartialOrd for Content {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.s.len().cmp(&other.s.len()))
+    }
+}
+
+impl PartialEq for Content {
+    fn eq(&self, other: &Self) -> bool {
+        self.s.len() == other.s.len()
+    }
+}
+
+#[derive(Debug)]
+struct Node<T> {
+    elem: T,
+    left: TreeLink<T>,
+    center: TreeLink<T>,
+    right: TreeLink<T>,
+}
+impl<T> Node<T>{
+    pub fn new(elem:T) -> Node<T> {
+        Node{elem, left:None, center:None, right:None}
+    }
+    }
+#[derive(Debug)]
+pub struct Tree<T> {
+    root: TreeLink<T>,
+}
+type TreeLink<T> = Option<Box<Node<T>>>;
+
+impl<T: PartialEq + PartialOrd> Tree<T> {
+    fn new() -> Self {
+        Tree { root: None }
+    }
+
+    fn add(&mut self, el: T) {
+        let mut current_node = &mut self.root;
+        while let Some(ref mut node) = current_node  {
+            if node.elem == el {
+                current_node = &mut node.center;
+            } else if node.elem < el {
+                current_node = &mut node.left;
+            } else {
+                current_node = &mut node.right;
+            }
+        }
+        *current_node = Some(Box::new(Node::new(el)));
+    }
+
+    fn howmany_smaller(&self, el: T) -> i32 {
+        let mut count = 0;
+        let mut stack = vec![];
+
+        if let Some(root_node) = &self.root {
+            stack.push(root_node);
+        }
+
+        while let Some(node) = stack.pop() {
+            // Check if the current node's element is smaller than `el`
+            if node.elem < el {
+                count += 1;
+                // Push center, left, and right nodes to the stack to keep searching
+                if let Some(ref center) = node.center {
+                    stack.push(center);
+                }
+                if let Some(ref left) = node.left {
+                    stack.push(left);
+                }
+                if let Some(ref right) = node.right {
+                    stack.push(right);
+                }
+            } else {
+                // Only push left nodes since elements greater or equal won't be counted
+                if let Some(ref left) = node.left {
+                    stack.push(left);
+                }
+            }
+        }
+
+        count
+    }
+}
+
 #[cfg(test)]
 mod mt_2_22_01_2024 {
     use finance::compare_wallet;
@@ -202,5 +297,42 @@ mod mt_2_22_01_2024 {
         let w2 = finance::wallet_2::Wallet{ euro: 90, cents: 50 };
 
         assert_eq!(compare_wallet(&w1, &w2), true);
+    }
+
+    #[test]
+    fn test_tree() {
+        let mut t = Tree{
+            root: Some(Box::new(Node{
+            elem: Content::new(10,"what".to_string()),
+            left: Some(Box::new(Node{
+            elem: Content::new(11,"who".to_string()),
+            left: None,
+            center: Some(Box::new(Node{
+            elem: Content::new(19,"ten".to_string()),
+            left: None,
+            center: None,
+            right: None
+            })),
+            right: None
+            })),
+            center: Some(Box::new(Node{
+            elem: Content::new(15,"zips".to_string()),
+            left: None,
+            center: None,
+            right: None
+            })),
+            right: Some(Box::new(Node{
+            elem: Content::new(88,"whose".to_string()),
+            left: None,
+            center: None,
+            right: None
+            }))
+            }))
+            };
+            let e56 = Content::new(45,"gips".to_string());
+            let e57 = Content::new(45,"naasdasdsad".to_string());
+            
+            assert_eq!(t.howmany_smaller(e56), 2);
+            assert_eq!(t.howmany_smaller(e57), 5);
     }
 }
