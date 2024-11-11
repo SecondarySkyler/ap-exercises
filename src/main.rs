@@ -17,6 +17,7 @@ mod assignment6;
 mod midterm_2_22_11_2022;
 //mod midterm2;
 mod ds;
+mod midterm_2_24_01_2023;
 
 #[allow(dead_code)]
 fn main() {
