@@ -15,7 +15,7 @@ mod assignment5;
 use assignment5::{print, Printable};
 mod assignment6;
 mod midterm_2_22_11_2022;
-mod midterm2;
+//mod midterm2;
 mod ds;
 
 #[allow(dead_code)]
