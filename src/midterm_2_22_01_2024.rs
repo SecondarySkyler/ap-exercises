@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use std::str::Chars;
+use std::{cell::RefCell, rc::Rc, str::Chars};
 
 // Exercise 1
 trait Nextable {
@@ -70,6 +70,37 @@ fn basicbox_sum(v: Vec<String>) -> Vec<Box<usize>> {
     return result
 }
 
+// Exercise 4
+#[derive(Debug)]
+struct MasterClock {
+    clock_cycle: Rc<RefCell<usize>>
+}
+
+impl MasterClock {
+    fn new() -> Self {
+        MasterClock { clock_cycle: Rc::new(RefCell::new(0)) }
+    }
+
+    fn tick(&mut self) {
+        *self.clock_cycle.borrow_mut() += 1;
+    }
+
+    fn get_slave(&self) -> SlaveClock {
+        SlaveClock { master_clock: Rc::clone(&self.clock_cycle) }
+    }
+}
+
+#[derive(Debug)]
+struct SlaveClock {
+    master_clock: Rc<RefCell<usize>>
+}
+
+impl SlaveClock {
+    fn get_clock(&self) -> usize {
+        *self.master_clock.borrow()
+    }
+}
+
 #[cfg(test)]
 mod mt_2_22_01_2024 {
     use super::*;
@@ -105,5 +136,31 @@ mod mt_2_22_01_2024 {
         let v = vec!["nope".to_string(), "game".to_string(), "bananas".to_string()];
         let r2 = basicbox_sum(v);
         assert_eq!(r2, vec![Box::new(4), Box::new(4), Box::new(7), Box::new(15)]);
+    }
+
+    #[test]
+    fn test_clock() {
+        let mut mc = MasterClock::new();
+        assert_eq!(mc.clock_cycle, Rc::new(RefCell::new(0 as usize)));
+
+        mc.tick();
+        mc.tick();
+        assert_eq!(mc.clock_cycle, Rc::new(RefCell::new(2 as usize)));
+
+        let mut mc1 = MasterClock::new();
+        let sc1 = mc1.get_slave();
+
+        mc1.tick();
+        mc1.tick();
+        mc1.tick();
+
+        assert_eq!(sc1.get_clock(), 3);
+        let sc2 = mc1.get_slave();
+
+        mc1.tick();
+        mc1.tick();
+
+        assert_eq!(sc1.get_clock(), 5);
+        assert_eq!(sc2.get_clock(), 5);
     }
 }
