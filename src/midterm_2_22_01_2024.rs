@@ -56,6 +56,20 @@ impl<'a> Iterator for ConsIter<'a> {
     }
 }
 
+// Exercise 3
+fn basicbox_sum(v: Vec<String>) -> Vec<Box<usize>> {
+    let mut result: Vec<Box<usize>> = Vec::new();
+    let mut tot_sum = 0;
+
+    for s in v {
+        result.push(Box::new(s.len()));
+        tot_sum += s.len();
+    }
+    result.push(Box::new(tot_sum));
+
+    return result
+}
+
 #[cfg(test)]
 mod mt_2_22_01_2024 {
     use super::*;
@@ -80,5 +94,16 @@ mod mt_2_22_01_2024 {
         assert_eq!(iw1.next(), Some('F'));
         assert_eq!(iw1.next(), Some('!'));
         assert_eq!(iw1.next(), None);
+    }
+
+    #[test]
+    fn test_bb_sum() {
+        let s = vec!["asd".to_string(), "where".to_string(), "what".to_string()];
+        let r1 = basicbox_sum(s);
+        assert_eq!(r1, vec![Box::new(3), Box::new(5), Box::new(4), Box::new(12)]);
+
+        let v = vec!["nope".to_string(), "game".to_string(), "bananas".to_string()];
+        let r2 = basicbox_sum(v);
+        assert_eq!(r2, vec![Box::new(4), Box::new(4), Box::new(7), Box::new(15)]);
     }
 }
