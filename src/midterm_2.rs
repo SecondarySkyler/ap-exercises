@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use std::{cell::RefCell, collections::{HashSet, LinkedList, VecDeque}, fmt::Debug, hash::Hash, rc::Rc};
+use std::{cell::RefCell, collections::{HashSet, LinkedList, VecDeque}, fmt::{Debug, Display}, hash::Hash, rc::Rc};
 
 // Exercise 1
 mod odd_module {
@@ -95,6 +95,165 @@ impl Iterator for BinIter {
 }
 
 // Exercise 5
+type Link<T> = Option<Rc<RefCell<ListNode<T>>>>;
+
+#[derive(Debug)]
+struct ListNode<T> {
+    element: T,
+    prev: Link<T>,
+    next: Link<T>
+}
+
+impl<T> ListNode<T> {
+    fn new(element: T) -> Rc<RefCell<Self>> {
+        Rc::new(RefCell::new(ListNode { element, prev: None, next: None }))
+    }
+}
+
+impl<T: PartialEq> PartialEq for ListNode<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.element == other.element
+    }
+}
+
+impl<T: Display> Display for ListNode<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.element)
+    }
+}
+
+struct List<T> {
+    size: usize,
+    head: Link<T>,
+    tail: Link<T>
+}
+
+impl<T: PartialEq> PartialEq for List<T> {
+    fn eq(&self, other: &Self) -> bool {
+        if self.size != other.size {
+            return false;
+        } else {
+            let mut current_head = self.head.clone();
+            let mut other_current_head = other.head.clone();
+
+            while let Some(node) = current_head {
+                if let Some(other_node) = other_current_head {
+                    if node.borrow().element != other_node.borrow().element {
+                        return false;
+                    }
+                    current_head = node.borrow().next.clone();
+                    other_current_head = other_node.borrow().next.clone();
+                } else {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+}
+
+impl<T: Display> Display for List<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut current_head = self.head.clone();
+        while let Some(node) = current_head {
+            write!(f, "{}", node.borrow().element);
+            current_head = node.borrow().next.clone();
+        }
+        Ok(())
+    }
+}
+
+impl<T: Display + Clone> List<T> {
+    fn new() -> Self {
+        List { size: 0, head: None, tail: None }
+    }
+
+    fn print_list(&self) {
+        println!("{}", self)
+    }
+
+    fn push(&mut self, element: T) {
+        let new_node = ListNode::new(element);
+
+        match self.head.take() {
+            Some(current_head) => {
+                current_head.borrow_mut().prev = Some(Rc::clone(&new_node));
+                new_node.borrow_mut().next = Some(Rc::clone(&current_head));
+                self.head = Some(Rc::clone(&new_node));
+                self.size += 1;
+            },
+            None => {
+                self.head = Some(Rc::clone(&new_node));
+                self.tail = Some(Rc::clone(&new_node));
+                self.size += 1;
+            },
+        }
+    }
+
+    fn pop(&mut self) -> Option<T> {
+        match self.head.take() {
+            Some(current_head) => {
+                let return_value = current_head.borrow().element.clone();
+
+                match current_head.borrow_mut().next.take() {
+                    Some(next_node) => {
+                        next_node.borrow_mut().prev = None;
+                        self.head = Some(Rc::clone(&next_node));
+                    },
+                    None => {
+                        // there is only 1 item in the list
+                        self.head = None;
+                        self.tail = None;
+                    },
+                }
+
+                self.size -= 1;
+                return Some(return_value)
+            },
+            None => None,
+        }
+    }
+
+    fn push_back(&mut self, element: T) {
+        let new_node = ListNode::new(element);
+
+        match self.tail.take() {
+            Some(current_tail) => {
+                current_tail.borrow_mut().next = Some(Rc::clone(&new_node));
+                new_node.borrow_mut().prev = Some(Rc::clone(&current_tail));
+                self.tail = Some(Rc::clone(&new_node));
+                self.size += 1;
+            },
+            None => {
+                self.head = Some(Rc::clone(&new_node));
+                self.tail = Some(Rc::clone(&new_node));
+                self.size += 1;
+            },
+        }
+    }
+
+    fn pop_back(&mut self) -> Option<T> {
+        match self.tail.take() {
+            Some(current_tail) => {
+                let return_value = current_tail.borrow().element.clone();
+
+                match current_tail.borrow_mut().prev.take() {
+                    Some(prev_node) => {
+                        prev_node.borrow_mut().next = None;
+                        self.tail = Some(Rc::clone(&prev_node));
+                    },
+                    None => {
+                        self.head = None;
+                        self.tail = None;
+                    },
+                }
+                self.size -= 1;
+                return Some(return_value)
+            },
+            None => None,
+        }
+    }
+}
 
 // Exercise 6
 type NodeRef<T> = Rc<Node<T>>;
@@ -266,6 +425,29 @@ mod test_mt2 {
         v.push(Box::new(32));
         v.push(Box::new("value".to_string()));
         print_vec(&v);
+    }
+
+    #[test]
+    fn test_dll() {
+        let mut linked_list = List::new();
+        linked_list.push(1);
+        linked_list.push(2);
+        linked_list.push(3);
+        assert_eq!(linked_list.head, Some(ListNode::new(3)));
+        assert_eq!(linked_list.tail, Some(ListNode::new(1)));
+
+        // pop
+        assert_eq!(linked_list.pop(), Some(3));
+        assert_eq!(linked_list.head, Some(ListNode::new(2)));
+
+        // push back
+        linked_list.push_back(4);
+        assert_eq!(linked_list.tail, Some(ListNode::new(4)));
+
+        // pop back
+        assert_eq!(linked_list.pop_back(), Some(4));
+        assert_eq!(linked_list.tail, Some(ListNode::new(1)))
+        
     }
 
     #[test]
