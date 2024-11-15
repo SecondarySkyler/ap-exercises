@@ -253,6 +253,26 @@ impl<T: Display + Clone> List<T> {
             None => None,
         }
     }
+
+    fn into_iter(self) -> IntoIter<T> {
+        IntoIter(self)
+    }
+}
+
+struct IntoIter<T>(List<T>);
+
+impl<T: Display + Clone> Iterator for IntoIter<T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.pop()
+    }
+}
+
+impl<T: Display + Clone> DoubleEndedIterator for IntoIter<T> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.0.pop_back()
+    }
 }
 
 // Exercise 6
@@ -448,6 +468,34 @@ mod test_mt2 {
         assert_eq!(linked_list.pop_back(), Some(4));
         assert_eq!(linked_list.tail, Some(ListNode::new(1)))
         
+    }
+
+    #[test]
+    fn test_dll_iter() {
+        let mut list = List::new();
+        list.push(1); list.push(2); list.push(3);
+
+        let mut list_it = list.into_iter();
+        assert_eq!(list_it.next(), Some(3));
+        assert_eq!(list_it.next(), Some(2));
+        assert_eq!(list_it.next(), Some(1));
+        assert_eq!(list_it.next(), None);
+    }
+
+    #[test]
+    fn test_dll_de_iter() {
+        let mut list = List::new();
+        list.push(1); list.push(2); list.push(3); list.push(4);
+
+        let mut list_it = list.into_iter();
+        assert_eq!(list_it.next(), Some(4));
+        assert_eq!(list_it.next_back(), Some(1));
+        assert_eq!(list_it.next_back(), Some(2));
+        assert_eq!(list_it.next(), Some(3));
+
+        assert_eq!(list_it.next_back(), None);
+        assert_eq!(list_it.next(), None);
+
     }
 
     #[test]
