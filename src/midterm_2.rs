@@ -332,6 +332,24 @@ impl<T: Hash + PartialEq + Eq> Graph<T> {
 
         history
     }
+
+    fn bfs(&self, root: NodeRef<T>) -> Vec<NodeRef<T>> {
+        let mut history = Vec::<NodeRef<T>>::new();
+        let mut visited = HashSet::<NodeRef<T>>::new();
+        let mut queue = VecDeque::<NodeRef<T>>::new();
+        queue.push_front(root);
+
+        while let Some(node) = queue.pop_front()  {
+            if visited.insert(Rc::clone(&node)) {
+                history.push(Rc::clone(&node));
+                for neighbor in node.neighbours.iter() {
+                    queue.push_back(Rc::clone(&neighbor));
+                }
+            }
+        }
+
+        history
+    }
 }
 
 // Exercise 7
@@ -520,6 +538,31 @@ mod test_mt2 {
         for node in visit.iter() {
             print!("{:?}", node.get_value());
         }
+    }
+
+    #[test]
+    fn test_bfs() {
+        let node3 = Rc::new(Node::new(3, vec![]));
+        let node4 = Rc::new(Node::new(4, vec![]));
+        let node5 = Rc::new(Node::new(5, vec![]));
+        let node6 = Rc::new(Node::new(6, vec![]));
+
+        let node1 = Rc::new(Node::new(1, vec![Rc::clone(&node4), Rc::clone(&node5)]));
+        let node2 = Rc::new(Node::new(2, vec![Rc::clone(&node6)]));
+
+        let node0 = Rc::new(Node::new(0, vec![Rc::clone(&node1), Rc::clone(&node2), Rc::clone(&node3)]));
+
+        let graph = Graph::new(vec![
+            Rc::clone(&node0),
+            Rc::clone(&node1), Rc::clone(&node2),Rc::clone(&node3),
+            Rc::clone(&node4), Rc::clone(&node5),Rc::clone(&node6),
+        ]);
+
+        let visit = graph.bfs(Rc::clone(&node0));
+        for node in visit.iter() {
+            print!("{:?}", node.get_value());
+        }
+        println!();
     }
 
     #[test]
