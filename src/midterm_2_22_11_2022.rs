@@ -69,6 +69,18 @@ fn basicbox_sum(v: Vec<String>) -> Vec<Box<usize>> {
     vb
 }
 
+// Alternative exercise 3
+fn alt_basicbox_sum(v: Vec<String>) -> Vec<Box<usize>> {
+    let mut sum = 0;
+
+    let mut result = v.iter().map(|s| {
+        sum += s.len();
+        Box::new(s.len())
+    }).collect::<Vec<Box<usize>>>();
+    result.push(Box::new(sum));
+    result
+}
+
 // Exercise 4
 type Link<T> = Option<Box<Node<T>>>;
 
@@ -274,6 +286,14 @@ mod mt_2_2022 {
     fn test_ex3() {
         let s = vec!["asd".to_string(), "where".to_string(), "what".to_string()];
         let sb = basicbox_sum(s);
+        let sb3: Vec<Box<usize>> = vec![Box::new(3), Box::new(5), Box::new(4), Box::new(12)];
+        assert_eq!(sb, sb3); 
+    }
+
+    #[test]
+    fn test_alt_ex3() {
+        let s = vec!["asd".to_string(), "where".to_string(), "what".to_string()];
+        let sb = alt_basicbox_sum(s);
         let sb3: Vec<Box<usize>> = vec![Box::new(3), Box::new(5), Box::new(4), Box::new(12)];
         assert_eq!(sb, sb3); 
     }
