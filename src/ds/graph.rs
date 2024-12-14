@@ -47,10 +47,22 @@ impl<T: Hash + Eq + Clone> DirectedGraph<T> {
     fn vertexes(&self) -> HashSet<&Vertex<T>> {
         self.adjacency_table.keys().collect()
     }
+
+    fn edges(&self) -> Vec<(&Vertex<T>, &Vertex<T>)> {
+        let mut edges = Vec::new();
+
+        for (node, neighbors) in self.adjacency_table.iter() {
+            for neighbor in neighbors {
+                edges.push((node, neighbor));
+            }
+        }
+
+        edges
+    }
 }
 
 #[cfg(test)]
-mod test_graph {
+mod test_graph_ds {
     use super::*;
 
     #[test]
@@ -62,6 +74,24 @@ mod test_graph {
 
         for vertex in expected_nodes.iter() {
             assert!(graph.vertexes().contains(vertex));
+        }
+    }
+
+    #[test]
+    fn test_neighbors() {
+        let mut graph = DirectedGraph::new();
+        graph.add_edge((Vertex::new(5), Vertex::new(10)));
+        graph.add_edge((Vertex::new(10), Vertex::new(12)));
+        graph.add_edge((Vertex::new(12), Vertex::new(5)));
+
+        let expected_edges = vec![
+            (Vertex::new(5), Vertex::new(10)),
+            (Vertex::new(10), Vertex::new(12)),
+            (Vertex::new(12), Vertex::new(5))
+        ];
+
+        for edge in graph.edges().iter() {
+            println!("{:?} -> {:?}", edge.0, edge.1);
         }
     }
 }
