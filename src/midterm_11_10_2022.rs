@@ -224,6 +224,10 @@ pub fn veclengths(v: &Vec<String>) -> Vec<usize> {
     res
 }
 
+// pub fn veclengths_v2(v: &Vec<String>) -> Vec<usize> {
+//     v.iter().map(|s| s.len()).collect()
+// }
+
 // --- QUESTION 19 ---
 pub fn remove_if_from_vector(v: &mut Vec<String>, length: usize) {
     if let Some(pos) = v.iter().position(|s| s.len() == length) {
