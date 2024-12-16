@@ -1,5 +1,5 @@
 #![allow(unused)]
-use std::{cell::RefCell, fmt::{Debug, Formatter}, rc::Rc, usize };
+use std::{cell::RefCell, fmt::{Debug, Formatter}, path::Iter, rc::Rc, usize };
 
 // Exercise 1
 trait Doublable {
@@ -67,6 +67,18 @@ fn basicbox_sum(v: Vec<String>) -> Vec<Box<usize>> {
     }
     vb.push(Box::new(total_sum));
     vb
+}
+
+// Alternative exercise 3
+fn alt_basicbox_sum(v: Vec<String>) -> Vec<Box<usize>> {
+    let mut sum = 0;
+
+    let mut result = v.iter().map(|s| {
+        sum += s.len();
+        Box::new(s.len())
+    }).collect::<Vec<Box<usize>>>();
+    result.push(Box::new(sum));
+    result
 }
 
 // Exercise 4
@@ -151,6 +163,48 @@ impl<T> List<T> {
             }
             return Some(&current.as_ref().unwrap().elem);
         }
+    }
+
+    fn remove(&mut self, p: i32) -> Result<(), String> {
+        if self.len < p {
+            Err("wrong position".to_string())
+        } else {
+            let mut current = &mut self.head;
+            for _ in 0..p {
+                current = &mut current.as_mut().unwrap().next;
+            }
+
+            let next = current.as_mut().unwrap().next.take();
+            *current = next;
+            self.len -= 1;
+            Ok(())
+        }
+    }
+
+    fn pop(&mut self) -> Option<T> {
+        match self.head.take() {
+            Some(current_head) => {
+                self.head = current_head.next;
+                self.len -= 1;
+                Some(current_head.elem)
+            },
+            None => None,
+        }
+    }
+
+    fn pop_last(&mut self) -> Option<T> {
+        let mut tmp: &mut Option<Box<Node<T>>>;
+
+        match self.head {
+            Some(_) => tmp = &mut self.head,
+            None => return None,
+        }
+
+        while tmp.as_mut().unwrap().next.is_some() {
+            tmp = &mut tmp.as_mut().unwrap().next;
+        }
+
+        Some(tmp.take().unwrap().elem)
     }
 
 }
@@ -279,6 +333,14 @@ mod mt_2_2022 {
     }
 
     #[test]
+    fn test_alt_ex3() {
+        let s = vec!["asd".to_string(), "where".to_string(), "what".to_string()];
+        let sb = alt_basicbox_sum(s);
+        let sb3: Vec<Box<usize>> = vec![Box::new(3), Box::new(5), Box::new(4), Box::new(12)];
+        assert_eq!(sb, sb3); 
+    }
+
+    #[test]
     fn test_new_ex4() {
         let list: List<i32> = List::new();
         assert_eq!(list.len, 0);
@@ -324,6 +386,40 @@ mod mt_2_2022 {
         l.append(1);
         l.append(2);
         assert_eq!(l.get(2), Some(&2));
+    }
+
+    #[test]
+    fn test_remove_ex4() {
+        let mut list: List<i32> = List::new();
+        list.append(10);
+        list.append(20);
+        list.append(30);
+        list.remove(2);
+
+        assert_eq!(list.len, 2);
+        assert_eq!(list.get(0), Some(&10));
+        assert_eq!(list.get(1), Some(&20));
+        assert_eq!(list.get(2), None);
+    }
+
+    #[test]
+    fn test_list_pop_head() {
+        let mut list: List<i32> = List::new();
+        list.append(10);
+        list.append(20);
+        list.append(30);
+
+        assert_eq!(list.pop(), Some(10));
+    }
+
+    #[test]
+    fn test_list_pop_back() {
+        let mut list: List<i32> = List::new();
+        list.append(10);
+        list.append(20);
+        list.append(30);
+
+        assert_eq!(list.pop_last(), Some(30));
     }
 
     #[test]

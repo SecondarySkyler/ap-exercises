@@ -91,6 +91,10 @@ fn basicbox_inc(v: Vec<String>) -> Vec<Box<usize>> {
     res
 }
 
+fn basicbox_inc_v2(v: Vec<String>) -> Vec<Box<usize>> {
+    v.iter().map(|s| Box::new(s.len() + 1)).collect()
+}
+
 // Exercise 4
 #[derive(Debug)]
 pub struct List<T> {
@@ -290,6 +294,27 @@ mod mt_2_24_01_2023 {
         assert_eq!(*res[0], 4);
         assert_eq!(*res[1], 6);
         assert_eq!(*res[2], 5);
+
+        let s2 = vec!["who".to_string(), "whose".to_string(), "noway".to_string()];
+        let res2 = basicbox_inc(s2);
+        assert_eq!(*res2[0], 4);
+        assert_eq!(*res2[1], 6);
+        assert_eq!(*res2[2], 6);
+    }
+
+    #[test]
+    fn test_basic_box_inc_v2() {
+        let s = vec!["asd".to_string(), "where".to_string(), "what".to_string()];
+        let res = basicbox_inc_v2(s);
+        assert_eq!(*res[0], 4);
+        assert_eq!(*res[1], 6);
+        assert_eq!(*res[2], 5);
+
+        let s2 = vec!["who".to_string(), "whose".to_string(), "noway".to_string()];
+        let res2 = basicbox_inc_v2(s2);
+        assert_eq!(*res2[0], 4);
+        assert_eq!(*res2[1], 6);
+        assert_eq!(*res2[2], 6);
     }
 
     #[test]

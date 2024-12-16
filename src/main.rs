@@ -20,6 +20,7 @@ mod ds;
 mod midterm_2_24_01_2023;
 mod midterm_2_22_01_2024;
 mod midterm_2_18_11_2024_v2;
+mod midterm_2_18_11_2024;
 
 #[allow(dead_code)]
 fn main() {
