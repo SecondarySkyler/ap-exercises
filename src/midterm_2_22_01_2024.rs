@@ -184,9 +184,9 @@ impl<T: PartialEq + PartialOrd> Tree<T> {
             if node.elem == el {
                 current_node = &mut node.center;
             } else if node.elem < el {
-                current_node = &mut node.left;
-            } else {
                 current_node = &mut node.right;
+            } else {
+                current_node = &mut node.left;
             }
         }
         *current_node = Some(Box::new(Node::new(el)));
