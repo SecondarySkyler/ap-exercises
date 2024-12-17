@@ -220,6 +220,91 @@ mod rack {
     }
 }
 
+// Exercise 6
+// Ternary search tree with isthere() method
+#[derive(Debug)]
+struct Content {
+    pub i: i32,
+    pub s: String
+}
+
+impl Content {
+    pub fn new(i: i32, s: String) -> Self {
+        Content { i, s }
+    }
+}
+
+impl PartialEq for Content {
+    fn eq(&self, other: &Self) -> bool {
+        self.s.len() == other.s.len()
+    }
+}
+
+impl PartialOrd for Content {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.s.len().partial_cmp(&other.s.len())
+    }
+}
+
+type TreeLink<T> = Option<Box<Node<T>>>;
+
+#[derive(Debug)]
+struct Node<T> {
+    elem: T,
+    left: TreeLink<T>,
+    center: TreeLink<T>,
+    right: TreeLink<T>,
+}
+
+impl<T> Node<T> {
+    pub fn new(elem: T) -> Node<T> {
+        Node{ elem, left: None, center: None, right: None }
+    }
+}
+
+#[derive(Debug)]
+struct Tree<T> {
+    root: TreeLink<T>
+}
+
+impl<T: PartialEq + PartialOrd> Tree<T> {
+    fn new() -> Self {
+        Tree { root: None }
+    }
+
+    fn add(&mut self, el: T) {
+        let mut current_node = &mut self.root;
+        while let Some(ref mut node) = current_node {
+            if node.elem == el {
+                current_node = &mut node.center;
+            } else if node.elem < el {
+                current_node = &mut node.right;
+            } else {
+                current_node = &mut node.left;
+            }
+        }
+        *current_node = Some(Box::new(Node::new(el)));
+    }
+
+    fn isthere(&self, el: &T) -> Option<bool> {
+        if self.root.is_none() {
+            return None;
+        } else {
+            let mut curr = &self.root;
+            while let Some(ref node) = curr {
+                if node.elem == *el {
+                    return Some(true);
+                } else if node.elem < *el {
+                    curr = &node.right;
+                } else {
+                    curr = &node.left;
+                }
+            }
+            return None;
+        }
+    }
+}
+
 #[cfg(test)]
 mod mt_2_18_11_2024_v2 {
     use std::rc;
@@ -278,5 +363,65 @@ mod mt_2_18_11_2024_v2 {
         rack::router::router(2);
     }
 
+    // Tests ternary tree
+    #[test]
+    fn test_content() {
+        let e0 = Content::new(10,"asd".to_string());
+        let e1 = Content::new(10,"who".to_string());
+        let e2 = Content::new(11,"oneasd".to_string());
+
+        assert_eq!(e1 == e2, false);
+        assert_eq!(e1 == e0, true);
+        assert_eq!(e1 < e2, true);
+        assert_eq!(e1 > e2, false);
+    }
+
+    #[test]
+    fn test_tree_content() {
+        let mut t = Tree::new();
+        let e1 = Content::new(10,"asd".to_string());
+        let e2 = Content::new(11,"oneasd".to_string());
+        let e3 = Content::new(8,"bhas".to_string());
+        let e4 = Content::new(19,"xax".to_string());
+        let e5 = Content::new(45,"gip".to_string());
+        t.add(e1); t.add(e2); t.add(e3); t.add(e4); t.add(e5);
+        println!("{:?}",t);
+    }
+
+    #[test]
+    fn test_is_there() {
+        let mut t = Tree{
+            root: Some(Box::new(Node{
+                elem: Content::new(10,"what".to_string()),
+                left: Some(Box::new(Node{
+                    elem: Content::new(11,"who".to_string()),
+                    left: None,
+                    center: Some(Box::new(Node{
+                        elem: Content::new(19,"ten".to_string()),
+                        left: None,
+                        center: None,
+                        right: None
+                    })),
+                    right: None
+                })),
+                center: Some(Box::new(Node{
+                    elem: Content::new(15,"zips".to_string()),
+                    left: None,
+                    center: None,
+                    right: None
+                })),
+                right: Some(Box::new(Node{
+                    elem: Content::new(88,"whose".to_string()),
+                    left: None,
+                    center: None,
+                    right: None
+                }))
+            }))
+        };
+        let e56 = Content::new(45,"gips".to_string());
+        let e57 = Content::new(45,"naasdasdsad".to_string());
+        assert_eq!(t.isthere(&e56), Some(true));
+        assert_eq!(t.isthere(&e57), None);
+    }
 
 }
