@@ -202,14 +202,18 @@ pub fn hashandhash(h1: &mut HashMap<i32, String>, h2: &mut HashMap<String, i32>)
 
 // --- QUESTION 19 ---
 pub fn unique(mut h: HashMap<i32, String>, i: i32) -> Option<HashMap<i32, String>> {
-    if let Some(_) = h.get(&i) {
-        return None
-    } else {
-        let key = h.len() as i32;
-        let val = (0..i).map(|_| "X").collect::<String>();
-        h.insert(key, val);
-        return Some(h)
+   if i < 0 {
+        return None;
     }
+
+    for (_k, v) in &h {
+        if v.len() == i as usize {
+            return None;
+        }
+    }
+
+    h.insert(h.len() as i32, "X".repeat(i as usize));
+    return Some(h);
 }
 
 
