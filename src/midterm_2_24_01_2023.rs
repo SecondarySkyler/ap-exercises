@@ -107,6 +107,25 @@ struct Node<T> {
     elem: T,
     next: Link<T>,
 }
+
+impl<T: PartialOrd + PartialEq> Node<T> {
+    fn add(&mut self, e: T) {
+        if self.elem >= e {
+            let mut new_node = Node { elem: e, next: None };
+            std::mem::swap(self, &mut new_node);
+            self.next = Some(Box::new(new_node));
+            return;
+        }
+
+        match self.next {
+            None => {
+                self.next = Some(Box::new(Node { elem: e, next: None }));
+                return;
+            },
+            Some(ref mut node) => { node.add(e); }
+        }
+    }
+}
 #[derive(Debug)]
 pub struct Content {
     s : String, b : bool, i : i32,
@@ -169,6 +188,17 @@ impl<T: PartialOrd + PartialEq> List<T> {
                 }
             }
             
+        }
+    }
+
+    fn add_rec(&mut self, e: T) {
+        self.len += 1;
+        match self.head {
+            None => {
+                self.head = Some(Box::new(Node { elem: e, next: None, }));
+                return;
+            },
+            Some(ref mut node) => { node.add(e) }
         }
     }
 
@@ -345,6 +375,34 @@ mod mt_2_24_01_2023 {
         l.add(18);
         l.add(2);
         l.add(3);
+        println!("{:?}", l);
+    }
+
+    #[test]
+    fn test_list_add_rec_() {
+        let mut l: List<i32> = List::new();
+        l.add_rec(2);
+        l.add_rec(18);
+        l.add_rec(5);
+        l.add_rec(1);
+        println!("{:?}", l);
+    }
+
+    #[test]
+    fn test_list_add_rec_2() {
+        let mut l: List<i32> = List::new();
+        l.add_rec(2);
+        l.add_rec(3);
+        l.add_rec(18);
+        println!("{:?}", l);
+    }
+
+    #[test]
+    fn test_list_add_rec_3() {
+        let mut l: List<i32> = List::new();
+        l.add_rec(18);
+        l.add_rec(2);
+        l.add_rec(3);
         println!("{:?}", l);
     }
 
