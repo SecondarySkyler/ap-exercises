@@ -143,7 +143,7 @@ impl<T: PartialOrd + PartialEq> List<T> {
         if self.len == 0 {
             self.head = Some(new_node);
             self.len += 1;
-            return
+            return;
         }
 
         if self.head.as_ref().unwrap().elem > new_node.elem {
@@ -151,25 +151,24 @@ impl<T: PartialOrd + PartialEq> List<T> {
             self.head = Some(new_node);
             self.head.as_mut().unwrap().next = next;
             self.len += 1;
-        } else {
-            let mut current = &mut self.head;
-            while let Some(ref mut node) = current {
-                if node.elem < new_node.elem {
-                    if node.next.is_none() {
-                        node.next = Some(new_node);
-                        self.len += 1;
-                        return;
-                    } else {
-                        if node.next.as_ref().unwrap().elem > new_node.elem {
-                            let next = node.next.take();
-                            node.next = Some(new_node);
-                            node.next.as_mut().unwrap().next = next;
-                            self.len += 1;
-                            return;
-                        }
-                    }
+            return;
+        }
+
+        let mut current = &mut self.head;
+        while let Some(ref mut node) = current  {
+            if node.elem < new_node.elem {
+                // Here I can check whether the next node is greater than the new node or none, in both cases I can insert the new node
+                if node.next.is_none() || node.next.as_ref().unwrap().elem > new_node.elem {
+                    let next = node.next.take();
+                    node.next = Some(new_node);
+                    node.next.as_mut().unwrap().next = next;
+                    self.len += 1;
+                    return;
+                } else {
+                    current = &mut current.as_mut().unwrap().next;
                 }
             }
+            
         }
     }
 
@@ -320,15 +319,33 @@ mod mt_2_24_01_2023 {
     #[test]
     fn test_list() {
         let elem1 = Content::new_with("what".to_string(),true,2);
-        let elem2 = Content::new_with("thiss".to_string(),false,18);
-        let elem3 = Content::new_with("dopesss".to_string(),false,5);
+        let elem2 = Content::new_with("this".to_string(),false,18);
+        let elem3 = Content::new_with("dope".to_string(),false,5);
         let mut l : List<Content> = List::new();
         l.add(elem1);
         l.add(elem2);
         l.add(elem3);
-        let elem4 = Content::new_with("nop".to_string(),false,1);
+        let elem4 = Content::new_with("nope".to_string(),false,1);
         l.add(elem4);
-        // println!("{:?}",l);
+        println!("{:?}",l);
+    }
+
+    #[test]
+    fn test_list_2() {
+        let mut l: List<i32> = List::new();
+        l.add(2);
+        l.add(3);
+        l.add(18);
+        println!("{:?}", l);
+    }
+
+    #[test]
+    fn test_list_3() {
+        let mut l: List<i32> = List::new();
+        l.add(18);
+        l.add(2);
+        l.add(3);
+        println!("{:?}", l);
     }
 
     #[test]
